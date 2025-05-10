@@ -1,0 +1,46 @@
+- name: Update apt packages
+  apt:
+    update_cache: yes
+
+- name: Install JDK 21
+  apt:
+    name: openjdk-21-jdk
+    state: present
+
+- name: Set JAVA_HOME
+  lineinfile:
+    path: /etc/environment
+    line: 'JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64'
+    create: yes
+  notify: Reload environment
+
+- name: Install Maven
+  apt:
+    name: maven
+    state: present
+
+- name: Ensure Java project directory exists
+  file:
+    path: /opt/java-app/src/main/java
+    state: directory
+    recurse: yes
+
+- name: Create a simple Java file
+  copy:
+    dest: /opt/java-app/src/main/java/App.java
+    content: |
+      public class App {
+          public static void main(String[] args) {
+              System.out.println("Hello, Maven Build!");
+          }
+      }
+
+- name: Render pom.xml from template
+  template:
+    src: pom.xml.j2
+    dest: /opt/java-app/pom.xml
+
+- name: Build the Maven project
+  shell: mvn clean install
+  args:
+    chdir: /opt/java-app

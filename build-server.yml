@@ -1,0 +1,5 @@
+- name: Setup Java Maven Application Build Server
+  hosts: build_server
+  become: yes
+  roles:
+    - buildserver
